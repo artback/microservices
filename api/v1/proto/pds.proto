@@ -1,0 +1,28 @@
+syntax = "proto3";
+option go_package = "v1/port";
+message Port {
+  string ID = 1;
+  string Name = 2;
+  string City = 3;
+  string Country = 5;
+  repeated string Coordinates = 6;
+  string Province = 7;
+  string Timezone = 8;
+  repeated string Unlocs = 9;
+  string Code = 10;
+  repeated string Regions = 11;
+}
+
+message PortSummary {
+  // The number of ports received.
+  int32 port_count = 1;
+
+}
+message IDMsg {
+  string ID = 1;
+}
+
+service PDService {
+  rpc RecordPort(stream Port) returns (PortSummary);
+  rpc GetByID(IDMsg) returns (Port);
+}
