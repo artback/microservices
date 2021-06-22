@@ -29,16 +29,16 @@ type Port struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ID          string   `protobuf:"bytes,1,opt,name=ID,proto3" json:"ID,omitempty"`
-	Name        string   `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
-	City        string   `protobuf:"bytes,3,opt,name=City,proto3" json:"City,omitempty"`
-	Country     string   `protobuf:"bytes,5,opt,name=Country,proto3" json:"Country,omitempty"`
-	Coordinates []string `protobuf:"bytes,6,rep,name=Coordinates,proto3" json:"Coordinates,omitempty"`
-	Province    string   `protobuf:"bytes,7,opt,name=Province,proto3" json:"Province,omitempty"`
-	Timezone    string   `protobuf:"bytes,8,opt,name=Timezone,proto3" json:"Timezone,omitempty"`
-	Unlocs      []string `protobuf:"bytes,9,rep,name=Unlocs,proto3" json:"Unlocs,omitempty"`
-	Code        string   `protobuf:"bytes,10,opt,name=Code,proto3" json:"Code,omitempty"`
-	Regions     []string `protobuf:"bytes,11,rep,name=Regions,proto3" json:"Regions,omitempty"`
+	ID          string    `protobuf:"bytes,1,opt,name=ID,proto3" json:"ID,omitempty"`
+	Name        string    `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
+	City        string    `protobuf:"bytes,3,opt,name=City,proto3" json:"City,omitempty"`
+	Country     string    `protobuf:"bytes,5,opt,name=Country,proto3" json:"Country,omitempty"`
+	Coordinates []float32 `protobuf:"fixed32,6,rep,packed,name=Coordinates,proto3" json:"Coordinates,omitempty"`
+	Province    string    `protobuf:"bytes,7,opt,name=Province,proto3" json:"Province,omitempty"`
+	Timezone    string    `protobuf:"bytes,8,opt,name=Timezone,proto3" json:"Timezone,omitempty"`
+	Unlocs      []string  `protobuf:"bytes,9,rep,name=Unlocs,proto3" json:"Unlocs,omitempty"`
+	Code        string    `protobuf:"bytes,10,opt,name=Code,proto3" json:"Code,omitempty"`
+	Regions     []string  `protobuf:"bytes,11,rep,name=Regions,proto3" json:"Regions,omitempty"`
 }
 
 func (x *Port) Reset() {
@@ -101,7 +101,7 @@ func (x *Port) GetCountry() string {
 	return ""
 }
 
-func (x *Port) GetCoordinates() []string {
+func (x *Port) GetCoordinates() []float32 {
 	if x != nil {
 		return x.Coordinates
 	}
@@ -248,7 +248,7 @@ var file_pds_proto_rawDesc = []byte{
 	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x43, 0x69, 0x74, 0x79, 0x12, 0x18, 0x0a, 0x07,
 	0x43, 0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x43,
 	0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x20, 0x0a, 0x0b, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x69,
-	0x6e, 0x61, 0x74, 0x65, 0x73, 0x18, 0x06, 0x20, 0x03, 0x28, 0x09, 0x52, 0x0b, 0x43, 0x6f, 0x6f,
+	0x6e, 0x61, 0x74, 0x65, 0x73, 0x18, 0x06, 0x20, 0x03, 0x28, 0x02, 0x52, 0x0b, 0x43, 0x6f, 0x6f,
 	0x72, 0x64, 0x69, 0x6e, 0x61, 0x74, 0x65, 0x73, 0x12, 0x1a, 0x0a, 0x08, 0x50, 0x72, 0x6f, 0x76,
 	0x69, 0x6e, 0x63, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x50, 0x72, 0x6f, 0x76,
 	0x69, 0x6e, 0x63, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x54, 0x69, 0x6d, 0x65, 0x7a, 0x6f, 0x6e, 0x65,

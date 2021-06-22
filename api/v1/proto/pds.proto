@@ -5,7 +5,7 @@ message Port {
   string Name = 2;
   string City = 3;
   string Country = 5;
-  repeated string Coordinates = 6;
+  repeated float Coordinates = 6;
   string Province = 7;
   string Timezone = 8;
   repeated string Unlocs = 9;
