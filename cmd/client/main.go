@@ -29,8 +29,10 @@ func main() {
 	if err != nil {
 		log.Fatal(sum)
 	}
-	a := Api{}
-	a.Run()
+
+	dial, err := grpc.Dial(":4041", grpc.WithInsecure())
+	server := HttpServer{dial, ":8080"}
+	server.start(context.Background())
 }
 
 type Service struct {
@@ -67,15 +69,16 @@ func (s Service) Run(ctx context.Context) (*port.PortSummary, error) {
 	return res, nil
 }
 
-type Api struct {
-	conn *grpc.ClientConn
+type HttpServer struct {
+	dial *grpc.ClientConn
+	addr string
 }
 
-func (a Api) Run() error {
+func (h HttpServer) start(ctx context.Context) error {
 	router := runtime.NewServeMux()
-	err := api.RegisterPDServiceHandler(context.Background(), router, a.conn)
+	err := api.RegisterPDServiceHandler(ctx, router, h.dial)
 	if err != nil {
 		return err
 	}
-	return http.ListenAndServe(":8080", router)
+	http.ListenAndServe(h.addr, router)
 }
