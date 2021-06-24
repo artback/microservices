@@ -1,4 +1,28 @@
 syntax = "proto3";
+package v1.api;
+import "google/api/annotations.proto";
+
 option go_package = "v1/api";
 
+message Port {
+  string ID = 1;
+  string Name = 2;
+  string City = 3;
+  string Country = 5;
+  repeated float Coordinates = 6;
+  string Province = 7;
+  string Timezone = 8;
+  repeated string Unlocs = 9;
+  string Code = 10;
+  repeated string Regions = 11;
+}
 
+message IDMsg {
+  string ID = 1;
+}
+
+service PDService {
+  rpc GetByID(IDMsg) returns (Port) {
+    option (google.api.http) = { get: "/v1/portdomain" };
+  }
+}
