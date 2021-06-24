@@ -4,12 +4,12 @@ import (
 	"context"
 	"io"
 	"micro_services/api/v1/port"
-	"micro_services/pkg/pds/repository"
+	"micro_services/pkg/pds/portdomain"
 	"time"
 )
 
 type PortDomainService struct {
-	repository.PortRepository
+	portdomain.Repository
 }
 
 func (p PortDomainService) RecordPort(server port.PDService_RecordPortServer) error {
@@ -34,5 +34,5 @@ func (p PortDomainService) RecordPort(server port.PDService_RecordPortServer) er
 }
 
 func (p PortDomainService) GetByID(ctx context.Context, msg *port.IDMsg) (*port.Port, error) {
-	return p.PortRepository.GetByID(ctx, msg.GetID())
+	return p.Repository.GetByID(ctx, msg.GetID())
 }
