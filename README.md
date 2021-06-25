@@ -1,17 +1,7 @@
 # Golang microservices assignment
+### How to run
 
-## Time limits
-
-The evaluation result of the test is not linked to how much time you spend on it.
-Please DO NOT spend more than ~2 hours doing it, if you haven't complete the task simply submit as is.
-Successful applications show us that ~2 hours are more than enough to cover all the evaluation points below.
-
-This assignment is meant to evaluate the golang proficiency of full-time engineers.
-Your code structure should follow microservices best practices and our evaluation will focus primarily on your ability to follow good design principles and less on correctness and completeness of algorithms. During the face to face interview you will have the opportunity to explain your design choices and provide justifications for the parts that you omitted.
-
-**Do not mention 90 Percent of Everything or 90poe anywhere on the code or repository name.**
-
-**Do not copy any files from this repository**
+```docker-compose -f ./deploy/docker-compose.yml up```
 
 ## Evaluation points in order of importance
 
