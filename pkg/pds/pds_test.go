@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"io"
 	"micro_services/api/v1/port"
-	"micro_services/pkg/pds/repository"
+	"micro_services/pkg/pds/portdomain"
 	"reflect"
 	"testing"
 )
@@ -82,7 +82,7 @@ func (m mockServer) RecvMsg(_ interface{}) error {
 
 func TestPortDomainService_RecordPort(t *testing.T) {
 	type fields struct {
-		PortRepository repository.PortRepository
+		PortRepository portdomain.Repository
 	}
 	type args struct {
 		server port.PDService_RecordPortServer
@@ -115,7 +115,7 @@ func TestPortDomainService_RecordPort(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := PortDomainService{
-				PortRepository: tt.fields.PortRepository,
+				Repository: tt.fields.PortRepository,
 			}
 			if err := p.RecordPort(tt.args.server); (err != nil) != tt.wantErr {
 				t.Errorf("RecordPort() error = %v, wantErr %v", err, tt.wantErr)
@@ -126,7 +126,7 @@ func TestPortDomainService_RecordPort(t *testing.T) {
 
 func TestPortDomainService_GetByID(t *testing.T) {
 	type fields struct {
-		PortRepository repository.PortRepository
+		PortRepository portdomain.Repository
 	}
 	type args struct {
 		ctx context.Context
@@ -155,7 +155,7 @@ func TestPortDomainService_GetByID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := PortDomainService{
-				PortRepository: tt.fields.PortRepository,
+				Repository: tt.fields.PortRepository,
 			}
 			got, err := p.GetByID(tt.args.ctx, tt.args.msg)
 			if (err != nil) != tt.wantErr {

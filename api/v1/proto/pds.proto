@@ -1,5 +1,6 @@
 syntax = "proto3";
-option go_package = "v1/portdomain";
+package v1.pds;
+option go_package = "/v1/port";
 
 message Port {
   string ID = 1;
