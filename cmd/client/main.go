@@ -40,8 +40,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	s := Import{client, file}
-	_, err = s.Run(context.Background())
+	imp := Importer{client, file}
+	_, err = imp.Run(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,12 +57,12 @@ func main() {
 	log.Fatal(RunHTTPServer(context.Background(), grpcHost, httpHost))
 }
 
-type Import struct {
+type Importer struct {
 	port.PDServiceClient
 	r io.Reader
 }
 
-func (s Import) Run(ctx context.Context) (*port.PortSummary, error) {
+func (s Importer) Run(ctx context.Context) (*port.PortSummary, error) {
 	recorder, err := s.RecordPort(ctx)
 	if err != nil {
 		return nil, err
