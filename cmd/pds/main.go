@@ -14,6 +14,8 @@ import (
 	"micro_services/pkg/pds/mongodb"
 	"net"
 	"os"
+	"os/signal"
+	"time"
 )
 
 func main() {
@@ -47,7 +49,20 @@ func main() {
 
 	reflection.Register(srv)
 
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for range c {
+			// sig is a ^C, handle it
+		}
+
+		_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		srv.GracefulStop()
+	}()
+
 	if e := srv.Serve(listener); e != nil {
-		panic(err)
+		log.Fatal(err)
 	}
+
 }
