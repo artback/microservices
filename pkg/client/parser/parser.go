@@ -21,6 +21,10 @@ func ReadPorts(reader io.Reader, resChan chan Result) {
 	}
 	for dec.More() {
 		t, err = dec.Token()
+		if err == io.EOF {
+			resChan <- Result{nil, err}
+			break
+		}
 		if err != nil {
 			resChan <- Result{nil, err}
 			return
