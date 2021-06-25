@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
@@ -11,17 +13,26 @@ import (
 	"micro_services/pkg/pds"
 	"micro_services/pkg/pds/mongodb"
 	"net"
+	"os"
 )
 
 func main() {
-	listener, err := net.Listen("tcp", ":4040")
+	pdsHost, ok := os.LookupEnv("GRPC_ADDRESS")
+	if !ok {
+		log.Fatal(errors.New("GRPC_ADDRESS not set"))
+	}
+	listener, err := net.Listen("tcp", pdsHost)
 
 	if err != nil {
 		panic(err)
 	}
 	srv := grpc.NewServer()
 	// Set client options
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	mongodbHost, ok := os.LookupEnv("MONGO_DB_HOST")
+	if !ok {
+		log.Fatal(errors.New("MONGO_DB_HOST not set"))
+	}
+	clientOptions := options.Client().ApplyURI(fmt.Sprintf("mongodb://%s", mongodbHost))
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.Background(), clientOptions)

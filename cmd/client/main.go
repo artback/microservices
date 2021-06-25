@@ -3,15 +3,20 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 	"io"
 	"log"
 	"micro_services/api/v1/api"
 	"micro_services/api/v1/port"
+	"micro_services/pkg/client"
 	"micro_services/pkg/client/parser"
+	"net"
 	"net/http"
 	"os"
+	"os/signal"
+	"time"
 )
 
 func main() {
@@ -24,30 +29,41 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	s := Service{file}
-	sum, err := s.Run(context.Background())
-	if err != nil {
-		log.Fatal(sum)
+
+	pdsHost, ok := os.LookupEnv("PDS_HOST")
+	if !ok {
+		log.Fatal(errors.New("PDS_HOST not set"))
 	}
 
-	dial, err := grpc.Dial(":4041", grpc.WithInsecure())
-	server := HttpServer{dial, ":8080"}
-	server.start(context.Background())
+	dial, err := grpc.Dial(pdsHost, grpc.WithInsecure())
+	client := port.NewPDServiceClient(dial)
+	if err != nil {
+		log.Fatal(err)
+	}
+	s := Import{client, file}
+	_, err = s.Run(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+	httpHost, ok := os.LookupEnv("HTTP_ADDRESS")
+	if !ok {
+		log.Fatal(errors.New("HTTP_ADDRESS not set"))
+	}
+	grpcHost, ok := os.LookupEnv("GRPC_ADDRESS")
+	if !ok {
+		log.Fatal(errors.New("GRPC_ADDRESS not set"))
+	}
+	go startGRPCServer(grpcHost, client)
+	log.Fatal(RunHTTPServer(context.Background(), grpcHost, httpHost))
 }
 
-type Service struct {
+type Import struct {
+	port.PDServiceClient
 	r io.Reader
 }
 
-func (s Service) Run(ctx context.Context) (*port.PortSummary, error) {
-	dial, err := grpc.Dial(":4040", grpc.WithInsecure())
-	if err != nil {
-		return nil, err
-	}
-	defer dial.Close()
-	client := port.NewPDServiceClient(dial)
-
-	recorder, err := client.RecordPort(ctx)
+func (s Import) Run(ctx context.Context) (*port.PortSummary, error) {
+	recorder, err := s.RecordPort(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -69,16 +85,55 @@ func (s Service) Run(ctx context.Context) (*port.PortSummary, error) {
 	return res, nil
 }
 
-type HttpServer struct {
-	dial *grpc.ClientConn
-	addr string
-}
-
-func (h HttpServer) start(ctx context.Context) error {
-	router := runtime.NewServeMux()
-	err := api.RegisterPDServiceHandler(ctx, router, h.dial)
+func startGRPCServer(address string, serviceClient port.PDServiceClient) error {
+	// create a listener on TCP port
+	lis, err := net.Listen("tcp", address)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to listen: %v", err)
 	}
-	http.ListenAndServe(h.addr, router)
+	// create a server instance
+
+	c := client.ApiClient{serviceClient}
+	// create a gRPC server object
+	grpcServer := grpc.NewServer()
+	// attach the Ping service to the server
+	api.RegisterAPIServiceServer(grpcServer, &c)
+	// start the server
+	log.Printf("starting HTTP/2 gRPC server on %s", address)
+	if err := grpcServer.Serve(lis); err != nil {
+		return fmt.Errorf("failed to serve: %s", err)
+	}
+	return nil
+}
+func RunHTTPServer(ctx context.Context, grpcHost, httpHost string) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	mux := runtime.NewServeMux()
+	opts := []grpc.DialOption{grpc.WithInsecure()}
+	if err := api.RegisterAPIServiceHandlerFromEndpoint(ctx, mux, grpcHost, opts); err != nil {
+		log.Fatalf("failed to start HTTP gateway: %v", err)
+	}
+
+	srv := &http.Server{
+		Addr:    httpHost,
+		Handler: mux,
+	}
+
+	// graceful shutdown
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for range c {
+			// sig is a ^C, handle it
+		}
+
+		_, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		_ = srv.Shutdown(ctx)
+	}()
+
+	log.Println("starting HTTP/REST gateway...")
+	return srv.ListenAndServe()
 }

@@ -1,0 +1,31 @@
+version: '3.1'
+
+services:
+  db:
+    image: mongo
+    restart: always
+  pds:
+    build:
+      dockerfile: ./deploy/pds/Dockerfile
+      context: ..
+    restart: always
+    environment:
+      GRPC_ADDRESS: ":4040"
+      MONGO_DB_HOST: "db:27017"
+    depends_on:
+      - db
+  client:
+    build:
+      dockerfile: ./deploy/client/Dockerfile
+      context: ..
+    restart: always
+    environment:
+      HTTP_ADDRESS: ":9090"
+      GRPC_ADDRESS: "localhost:4041"
+      PDS_HOST: "pds:4040"
+    depends_on:
+      - db
+      - pds
+    ports:
+      - 9090:9090
+      - 4041:4041
